@@ -1,162 +1,71 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# # Open up a Jupyter notebook!!!!
+# 
+# We're going to write a scraper!!!!
+
+# In[21]:
 
 
 import requests
 from bs4 import BeautifulSoup
-
-
-# In[2]:
-
-
-response = requests.get("https://www.bbc.com/")
-doc = BeautifulSoup(response.text, 'html.parser')
-
-
-# In[3]:
-
-
-# Get all h3 tags with the class .media__title
-doc.find_all('h3', class_='media__title')
-
-
-# In[4]:
-
-
-# You need to understand CSS selectors
-# .media__title means "something with the class of media__title"
-# h3 means "something with the tag name of h3"
-# h3.media__title means "something with the tag name of h3 AND the class of media__title"
-# which means we can do crazy things like:
-# h3.media__title a
-# means "a link inside of (an h3 tag with the class of media__title)"
-doc.select('.media__title')
-
-
-# In[5]:
-
-
-# Get everything with the class of media__title
-# and then loop through them each and print out the text
-titles = doc.select('.media__title')
-for title in titles:
-    print(title.text.strip())
-
-
-# In[6]:
-
-
-# Get everything with the class of media__title
-# and then loop through them each and print out the text
-tags = doc.select('.media__tag')
-for tag in tags:
-    print(tag.text.strip())
+import pandas as pd
 
 
 # In[7]:
 
 
-len(titles)
+response = requests.get("https://www.bbc.com/")
+doc = BeautifulSoup(response.text)
 
 
-# In[8]:
+# In[15]:
 
 
-len(tags)
+# Grab all of the titles
+titles = doc.select(".media__title a")
+titles
 
 
-# In[9]:
+# In[18]:
 
 
-import pandas as pd
-
-pd.DataFrame({
-    'title': titles,
-    'tag': tags
-})
-
-
-# In[10]:
+for title in titles:
+    # title
+    print(title.text.strip())
+    # link
+    print(title['href'])
 
 
-summaries = doc.select('.media__summary')
-len(summaries)
+# In[22]:
 
 
-# In[11]:
-
-
-# titles = doc.select('.media__title')
-
-# find everything with the class of media-list__item
-# each one of these is going to be a row
-stories = doc.select('.media-list__item')
-
-# Starting off without ANY rows
+# Start with an empty list
 rows = []
 
-for story in stories:
-    print("----")
-    # Starting off knowing NONE of the columns of data for this datapoint?
+for title in titles:
+    # Go through each title, building a dictionary
+    # with a 'title' and a 'url'
     row = {}
-
-    # print(story)
-    # We want the one title INSIDE OF THIS STORY
-    # story.find('h3', class_='media-title)
-    # Let's update our dictionary's 'title' with the title
-    row['title'] = story.select_one('h3').text.strip()
-    # story.select_one('.media__link').get('href')
-#     try:
-#         print(story.select_one('.media__link')['href'])
-#     except:
-#         try:
-#             print(story.select_one('.reel__link')['href'])
-#         except:
-#             print("Couldn't find a link")
-
-    try:
-        # Find me a media__link OR a reel_link
-        row['href'] = story.select_one('.media__link, .reel__link')['href']
-    except:
-        print("Couldn't find a link")
-
-    try:
-        row['tag'] = story.select_one('.media__tag').text.strip()
-    except:
-        print("Couldn't find a tag!")
-
-    try:
-        row['summary'] = story.select_one('.media__summary').text.strip()
-    except:
-        print("Couldn't find a summary")
-
-    print(row)
-    # When we're done adding info to our row, we're going to add it into our list
-    # of rows
+    
+    # title
+    row['title'] = title.text.strip()
+    # link
+    row['url'] = title['href']
+    
+    # Then add it to our list of rows
     rows.append(row)
 
-
-# In[12]:
-
-
-rows
-
-
-# In[13]:
-
-
-import pandas as pd
-
+# then we're going to make a dataframe from it!!!
 df = pd.DataFrame(rows)
-df
+df.head()
 
 
-# In[14]:
+# In[23]:
 
 
-df.to_csv("bbc-headlines.csv", index=False)
+df.to_csv("bbc.csv", index=False)
 
 
 # In[ ]:
