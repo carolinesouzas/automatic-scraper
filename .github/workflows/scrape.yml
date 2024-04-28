@@ -2,26 +2,26 @@ name: scrape
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/20 * * * *'
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
-    - name: Chech out this repo
-      uses: actions/checkout@v2
-    - name: Set up Python  
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.10'
-    - name: Install the necessary libraries
-      run: pip install requests beautifulsoup4  pandas
-    - name: Run our scraping script
-      run: python scraper.py
-    - name: Commit and push if content changed
-      run: |-
-        git config user.name "Automated"
-        git config user.email "actions@users.noreply.git"
-        git add -A
-        temistamp=$(date -u)
-        git commit -m "Latedt data: ${stimestamp}"  || exit 
-        git push
+      - name: Check out this repo
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install all necessary packages
+        run: pip install requests beautifulsoup4 pandas
+      - name: Run the scraping script
+        run: python scrape.py
+      - name: Commit and push if content changed
+        run: |-
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          timestamp=$(date -u)
+          git commit -m "Latest data: ${timestamp}" || exit 0
+          git push
